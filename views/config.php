@@ -767,6 +767,16 @@ $onesignal_wp_settings = OneSignal::get_onesignal_settings();
             <label>Custom manifest.json URL<i class="tiny circular help icon link" role="popup" data-html="<p>Enter the complete URL to your existing manifest.json file to be used in place of our own. Your URL's domain should match that of your main site that users are visiting.</p><p>e.g. <code>https://yoursite.com/manifest.json</code></p>" data-variation="wide"></i></label>
             <input type="text" placeholder="https://yoursite.com/manifest.json" name="custom_manifest_url" value="<?php echo esc_attr(@$onesignal_wp_settings['custom_manifest_url']); ?>">
           </div>
+<!-- TEST Localhost -->
+          <div class="field">
+            <div class="ui toggle checkbox">
+              <input type="checkbox" name="use_custom_sdk_init" value="true" <?php if ($onesignal_wp_settings['use_custom_sdk_init']) {
+                      echo 'checked';
+                  } ?>>
+              <label>Disable OneSignal initialization<i class="tiny circular help icon link" role="popup" data-title="Disable OneSignal Initialization" data-content="Check this if you'd like to disable OneSignal's normal initialization. Useful if you are adding a custom initialization script. All the options you've set here in the WordPress plugin will be accessible in a global variable window._oneSignalInitOptions."></i></label>
+            </div>
+          </div>
+<!-- END TEST -->
           <div class="field">
             <div class="ui toggle checkbox">
               <input type="checkbox" name="use_custom_sdk_init" value="true" <?php if ($onesignal_wp_settings['use_custom_sdk_init']) {

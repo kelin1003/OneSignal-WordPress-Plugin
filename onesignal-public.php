@@ -119,6 +119,8 @@ class OneSignal_Public
         <?php
         echo "oneSignal_options['wordpress'] = true;\n";
         echo "oneSignal_options['appId'] = '".OneSignalUtils::html_safe($onesignal_wp_settings['app_id'])."';\n";
+                //TODO: Allows for localhost testing, remove before using
+        echo "oneSignal_options['allowLocalhostAsSecureOrigin'] = true;\n";
 
         if ($onesignal_wp_settings['prompt_auto_register'] == '1') {
             echo "oneSignal_options['autoRegister'] = true;\n";
