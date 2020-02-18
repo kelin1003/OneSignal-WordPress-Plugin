@@ -1,7 +1,7 @@
 jQuery(document).ready(notice);
 
 var state = {
-    post_id : ajax_object.post_id,  // post id sent from php backend
+    post_id : onesignal_ajax_object.post_id,  // post id sent from php backend
     first_modified : undefined,     // when the post was first modified
     started : false,                // post notification requests started
     interval: undefined,            // global interval for reattempting requests
@@ -66,11 +66,11 @@ function notice() {
    */
   const get_metadata = () => {
     const data = {
-      action: "has_metadata",
+      action: "onesignal_has_metadata",
       post_id: state.post_id
     };
 
-    jQuery.get(ajax_object.ajax_url, data, function(response) {
+    jQuery.get(onesignal_ajax_object.ajax_url, data, function(response) {
       response = JSON.parse(response);
       const { recipients, status_code, response_body } = response;
 
