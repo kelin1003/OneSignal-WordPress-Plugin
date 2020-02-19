@@ -6,53 +6,6 @@ defined('ABSPATH') or die('This page may not be accessed directly.');
  * Loads js script that includes ajax call with post id
  */
 
-add_action('admin_enqueue_scripts', 'onesignal_load_javascript');
-function onesignal_load_javascript()
-{
-    global $post;
-    if ( $post ) {
-        wp_register_script('onesignal_notice_script', plugins_url('notice.js', __FILE__), array('jquery'), '1.1', true);
-        wp_enqueue_script('onesignal_notice_script');
-        wp_localize_script('onesignal_notice_script', 'onesignal_ajax_object', array('ajax_url' => admin_url('admin-ajax.php'), 'post_id' => $post->ID));
-    }
-}
-
-add_action('wp_ajax_onesignal_has_metadata', 'onesignal_has_metadata');
-function onesignal_has_metadata()
-{
-	$post_id = isset( $_GET['post_id'] ) ? ( filter_var( wp_unslash( $_GET['post_id'] ), FILTER_SANITIZE_NUMBER_INT ) ) : ''; // WPCS: Input var okay. CSRF okay.
-
-    if (is_null($post_id)) {
-        $data = array('error' => 'could not get post id');
-    } else {
-        $recipients = get_post_meta($post_id, 'onesignal_recipients');
-        if ($recipients && is_array($recipients)) {
-            $recipients = $recipients[0];
-        }
-
-        $status = get_post_meta($post_id, 'onesignal_status');
-        if ($status && is_array($status)) {
-            $status = $status[0];
-        }
-
-        $response_body = get_post_meta($post_id, 'onesignal_response_body');
-        if ($response_body && is_array($response_body)) {
-            $response_body = $response_body[0];
-        }
-
-        // reset meta
-        delete_post_meta($post_id, 'onesignal_status');
-        delete_post_meta($post_id, 'onesignal_recipients');
-        delete_post_meta($post_id, 'onesignal_response_body');
-
-        $data = array('recipients' => $recipients, 'status_code' => $status, 'response_body' => $response_body);
-    }
-
-    echo wp_json_encode($data);
-
-    exit;
-}
-
 class OneSignal_Admin
 {
     /**
@@ -130,11 +83,56 @@ class OneSignal_Admin
             add_action('admin_init', array(__CLASS__, 'add_onesignal_post_options'));
         }
 
-        add_action('save_post', array(__CLASS__, 'on_save_post'), 1, 3);
-        add_action('transition_post_status', array(__CLASS__, 'on_transition_post_status'), 10, 3);
-        add_action('admin_enqueue_scripts', array(__CLASS__, 'admin_styles'));
+        add_action( 'save_post', array( __CLASS__, 'on_save_post' ), 1, 3 );
+        add_action( 'transition_post_status', array( __CLASS__, 'on_transition_post_status' ), 10, 3 );
+        add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_styles' ) );
+        add_action( 'admin_enqueue_scripts', array( __CLASS__, 'onesignal_load_javascript' ) );
+        add_action( 'wp_ajax_onesignal_has_metadata', array( __CLASS__, 'onesignal_has_metadata' ) );
 
         return $onesignal;
+    }
+
+    public static function onesignal_load_javascript() {
+        global $post;
+        if ( $post ) {
+            wp_register_script('onesignal_notice_script', plugins_url('notice.js', __FILE__), array('jquery'), '1.1', true);
+            wp_enqueue_script('onesignal_notice_script');
+            wp_localize_script('onesignal_notice_script', 'onesignal_ajax_object', array('ajax_url' => admin_url('admin-ajax.php'), 'post_id' => $post->ID));
+        }
+    }
+
+    public static function onesignal_has_metadata() {
+        $post_id = isset( $_GET['post_id'] ) ? ( filter_var( wp_unslash( $_GET['post_id'] ), FILTER_SANITIZE_NUMBER_INT ) ) : ''; // WPCS: Input var okay. CSRF okay.
+
+        if (is_null($post_id)) {
+            $data = array('error' => 'could not get post id');
+        } else {
+            $recipients = get_post_meta($post_id, 'onesignal_recipients');
+            if ($recipients && is_array($recipients)) {
+                $recipients = $recipients[0];
+            }
+
+            $status = get_post_meta($post_id, 'onesignal_status');
+            if ($status && is_array($status)) {
+                $status = $status[0];
+            }
+
+            $response_body = get_post_meta($post_id, 'onesignal_response_body');
+            if ($response_body && is_array($response_body)) {
+                $response_body = $response_body[0];
+            }
+
+            // reset meta
+            delete_post_meta($post_id, 'onesignal_status');
+            delete_post_meta($post_id, 'onesignal_recipients');
+            delete_post_meta($post_id, 'onesignal_response_body');
+
+            $data = array('recipients' => $recipients, 'status_code' => $status, 'response_body' => $response_body);
+        }
+
+        echo wp_json_encode($data);
+
+        exit;
     }
 
     public static function admin_styles()
