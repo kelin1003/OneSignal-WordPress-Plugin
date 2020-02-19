@@ -2,10 +2,6 @@
 
 defined('ABSPATH') or die('This page may not be accessed directly.');
 
-function onesignal_change_footer_admin()
-{
-    return '';
-}
 /*
  * Loads js script that includes ajax call with post id
  */
@@ -488,7 +484,7 @@ class OneSignal_Admin
 
     public static function admin_custom_load()
     {
-        add_action('admin_enqueue_scripts', array(__CLASS__, 'admin_custom_scripts'));
+        add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_custom_scripts' ) );
 
         $onesignal_wp_settings = OneSignal::get_onesignal_settings();
 
@@ -496,43 +492,43 @@ class OneSignal_Admin
             return;
         }
 
-        if (
-          '' === $onesignal_wp_settings['app_id'] ||
-          '' === $onesignal_wp_settings['app_rest_api_key']
-      ) {
-            function onesignal_admin_notice_setup_not_complete()
-            {
-                ?>
-              <script>
-                  document.addEventListener('DOMContentLoaded', function() {
-                      activateSetupTab('setup/0');
-                  });
-              </script>
-			  <div class="error notice onesignal-error-notice">
-				  <p><strong>OneSignal Push:</strong> <em>Your setup is not complete. Please follow the Setup guide to set up web push notifications. Both the App ID and REST API Key fields are required.</em></p>
-			  </div>
-			  <?php
-            }
-
-            add_action('admin_notices', 'onesignal_admin_notice_setup_not_complete');
+        if ( empty( $onesignal_wp_settings['app_id'] ) || empty( $onesignal_wp_settings['app_rest_api_key'] ) ) {
+            add_action( 'admin_notices', array( __CLASS__, 'admin_notice_setup_not_complete' ) );
         }
 
-        if (!function_exists('curl_init')) {
-            function onesignal_admin_notice_curl_not_installed()
-            {
-                ?>
-			  <div class="error notice onesignal-error-notice">
-				  <p><strong>OneSignal Push:</strong> <em>cURL is not installed on this server. cURL is required to send notifications. Please make sure cURL is installed on your server before continuing.</em></p>
-			  </div>
-			  <?php
-            }
-            add_action('admin_notices', 'onesignal_admin_notice_curl_not_installed');
+        if ( ! function_exists( 'curl_init' ) ) {
+            add_action( 'admin_notices', array( __CLASS__, 'admin_notice_curl_not_installed' ) );
         }
-    }
+	}
 
-    public static function admin_custom_scripts()
-    {
-        add_filter('admin_footer_text', 'onesignal_change_footer_admin', 9999); // 9999 means priority, execute after the original fn executes
+	public static function admin_notice_setup_not_complete() {
+		?>
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				activateSetupTab('setup/0');
+			});
+		</script>
+		<div class="error notice onesignal-error-notice">
+			<p><strong>OneSignal Push:</strong> <em>Your setup is not complete. Please follow the Setup guide to set up web push notifications. Both the App ID and REST API Key fields are required.</em></p>
+		</div>
+		<?php
+	}
+
+	public static function admin_notice_curl_not_installed() {
+		?>
+		<div class="error notice onesignal-error-notice">
+			<p><strong>OneSignal Push:</strong> <em>cURL is not installed on this server. cURL is required to send notifications. Please make sure cURL is installed on your server before continuing.</em></p>
+		</div>
+		<?php
+	}
+
+	public static function onesignal_change_footer_admin() {
+		return '';
+	}
+
+    public static function admin_custom_scripts() {
+
+        add_filter( 'admin_footer_text', array( __CLASS__, 'onesignal_change_footer_admin', 9999 ); // 9999 means priority, execute after the original fn executes
 
         wp_enqueue_style('onesignal-icons', plugin_dir_url(__FILE__).'views/css/icons.css', false, OneSignal_Admin::$RESOURCES_VERSION);
         wp_enqueue_style('onesignal-semantic-ui', plugin_dir_url(__FILE__).'views/css/semantic-ui.css', false, OneSignal_Admin::$RESOURCES_VERSION);

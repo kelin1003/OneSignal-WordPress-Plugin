@@ -2,17 +2,6 @@
 
 defined( 'ABSPATH' ) or die( 'This page may not be accessed directly.' );
 
-function onesignal_add_async_for_script( $url ) {
-
-	if ( false === strpos( $url, '#asyncload' ) ) {
-		return $url;
-	} elseif ( is_admin() ) {
-		return str_replace( '#asyncload', '', $url );
-	} else {
-		return str_replace( '#asyncload', '', $url ) . "' async='async";
-	}
-}
-
 class OneSignal_Public {
 
 	public function __construct() {}
@@ -52,7 +41,7 @@ class OneSignal_Public {
 			OneSignal_Public::insert_onesignal_stamp();
 		}
 
-		add_filter( 'clean_url', 'onesignal_add_async_for_script', 11, 1 );
+		add_filter( 'clean_url', array( __CLASS__, 'add_async_for_script' ), 11, 1 );
 
 		if ( defined( 'ONESIGNAL_DEBUG' ) && defined( 'ONESIGNAL_LOCAL' ) ) {
 			wp_register_script( 'onesignal_local_sdk', 'https://localhost:3001/sdks/OneSignalSDK.js#asyncload', array( 'jquery' ), false, true );
@@ -377,6 +366,17 @@ class OneSignal_Public {
 			}
 		</script>
 		<?php
+	}
+
+	public static function add_async_for_script( $url ) {
+
+		if ( false === strpos( $url, '#asyncload' ) ) {
+			return $url;
+		} elseif ( is_admin() ) {
+			return str_replace( '#asyncload', '', $url );
+		} else {
+			return str_replace( '#asyncload', '', $url ) . "' async='async";
+		}
 	}
 }
 ?>
